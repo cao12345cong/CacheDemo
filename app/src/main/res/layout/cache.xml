@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/activity_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <Button
+            android:id="@+id/btn_save_string"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:onClick="doClick"
+            android:scaleType="fitXY"
+            android:text="save Stirng" />
+
+        <Button
+            android:id="@+id/btn_save_bitmap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:onClick="doClick"
+            android:scaleType="fitXY"
+            android:text="save Bitmap" />
+
+
+        <Button
+            android:id="@+id/btn_save_object"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:onClick="doClick"
+            android:scaleType="fitXY"
+            android:text="save Object" />
+
+        <Button
+            android:id="@+id/btn_save_byte"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:onClick="doClick"
+            android:scaleType="fitXY"
+            android:text="save bytes" />
+
+        <Button
+            android:id="@+id/btn_get_string"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:onClick="doClick"
+            android:scaleType="fitXY"
+            android:text="get Stirng" />
+
+        <Button
+            android:id="@+id/btn_get_bitmap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:onClick="doClick"
+            android:scaleType="fitXY"
+            android:text="get Bitmap" />
+
+
+        <Button
+            android:id="@+id/btn_get_object"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:onClick="doClick"
+            android:scaleType="fitXY"
+            android:text="get Object" />
+
+        <Button
+            android:id="@+id/btn_get_bytes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:onClick="doClick"
+            android:scaleType="fitXY"
+            android:text="get bytes" />
+
+        <Button
+            android:id="@+id/btn_expire_string"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:onClick="doClick"
+            android:scaleType="fitXY"
+            android:text="test expire string" />
+
+        <Button
+            android:id="@+id/btn_expire_bitmap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:onClick="doClick"
+            android:scaleType="fitXY"
+            android:text="test expire bitmap" />
+
+        <Button
+            android:id="@+id/btn_expire_object"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:onClick="doClick"
+            android:scaleType="fitXY"
+            android:text="test expire object" />
+
+        <Button
+            android:id="@+id/btn_expire_byte"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:onClick="doClick"
+            android:scaleType="fitXY"
+            android:text="test expire2 byte" />
+
+        <ImageView
+            android:id="@+id/image_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="doClick" />
+
+    </LinearLayout>
+</ScrollView>
