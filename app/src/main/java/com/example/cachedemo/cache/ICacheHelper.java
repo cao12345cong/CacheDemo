@@ -21,7 +21,7 @@ public interface ICacheHelper {
 
     byte[] getByteArray(String key);
 
-    Object getObject(String key);
+    Serializable getSerializable(String key);
 
     Bitmap getBitmap(String key);
 

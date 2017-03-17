@@ -1,11 +1,11 @@
-package com.example.cachedemo.cache;
+package com.example.cachedemo.cache.disc.impl;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
-
-import com.example.cachedemo.cache.ext.DiskLruCache;
+import com.example.cachedemo.cache.ICacheHelper;
+import com.example.cachedemo.cache.disc.impl.ext.DiskLruCache;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -16,24 +16,20 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 
-/**
- * Created by caocong on 3/3/17.
- */
 
-public class CustomBaseDiskCache implements ICacheHelper {
-    private static final String TAG = CustomBaseDiskCache.class.getSimpleName();
-    protected DiskLruCache cache;
+public class LruDiskCache implements ICacheHelper {
+    private static final String TAG = LruDiskCache.class.getSimpleName();
+    private DiskLruCache mCache;
 
-    public CustomBaseDiskCache(File cacheDir, long cacheMaxSize) throws IOException {
+    public LruDiskCache(File cacheDir, long cacheMaxSize) throws IOException {
         this(cacheDir, cacheMaxSize, 0);
     }
 
-    public CustomBaseDiskCache(File cacheDir, long cacheMaxSize,
-                               int cacheMaxFileCount) throws IOException {
+    public LruDiskCache(File cacheDir, long cacheMaxSize,
+                        int cacheMaxFileCount) throws IOException {
         if (cacheMaxSize < 0) {
             throw new IllegalArgumentException("cacheMaxSize value set error");
         }
@@ -53,8 +49,8 @@ public class CustomBaseDiskCache implements ICacheHelper {
     private void initCache(File cacheDir, long cacheMaxSize, int cacheMaxFileCount)
             throws IOException {
         try {
-            cache = DiskLruCache.open(cacheDir, 1, 1, cacheMaxSize, cacheMaxFileCount);
-            if (cache == null) {
+            mCache = DiskLruCache.open(cacheDir, 1, 1, cacheMaxSize, cacheMaxFileCount);
+            if (mCache == null) {
                 throw new RuntimeException("Can't initialize disk cache");
             }
         } catch (IOException e) {
@@ -70,9 +66,9 @@ public class CustomBaseDiskCache implements ICacheHelper {
 
 
     @Override
-    public boolean put(String key, String value) {
+    public synchronized boolean put(String key, String value) {
         try {
-            return put(key, value.getBytes("utf-8"));
+            return put(generatorKey(key), value.getBytes("utf-8"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             return false;
@@ -80,12 +76,12 @@ public class CustomBaseDiskCache implements ICacheHelper {
     }
 
     @Override
-    public boolean put(String key, byte[] data) {
-        OutputStream os = null;
+    public synchronized boolean put(String key, byte[] data) {
+        BufferedOutputStream os = null;
         boolean success = false;
         DiskLruCache.Editor editor = null;
         try {
-            editor = getDiskLruCacheEditor(key);
+            editor = getDiskLruCacheEditor(generatorKey(key));
             if (editor == null) {
                 return false;
             }
@@ -104,12 +100,12 @@ public class CustomBaseDiskCache implements ICacheHelper {
     }
 
     @Override
-    public boolean put(String key, Serializable value) {
+    public synchronized boolean put(String key, Serializable value) {
         ObjectOutputStream os = null;
         boolean success = false;
         DiskLruCache.Editor editor = null;
         try {
-            editor = getDiskLruCacheEditor(key);
+            editor = getDiskLruCacheEditor(generatorKey(key));
             if (editor == null) {
                 return false;
             }
@@ -128,8 +124,8 @@ public class CustomBaseDiskCache implements ICacheHelper {
     }
 
     @Override
-    public boolean put(String key, Bitmap bitmap) {
-        return put(key, bitmap2Bytes(bitmap));
+    public synchronized boolean put(String key, Bitmap bitmap) {
+        return put(generatorKey(key), bitmap2Bytes(bitmap));
     }
 
     private byte[] bitmap2Bytes(Bitmap bm) {
@@ -147,7 +143,7 @@ public class CustomBaseDiskCache implements ICacheHelper {
     }
 
     @Override
-    public String getString(String key) {
+    public synchronized String getString(String key) {
         try {
             byte[] bytes = getByteArray(generatorKey(key));
             if (bytes == null || bytes.length == 0) {
@@ -162,7 +158,7 @@ public class CustomBaseDiskCache implements ICacheHelper {
     }
 
     @Override
-    public byte[] getByteArray(String key) {
+    public synchronized byte[] getByteArray(String key) {
         BufferedInputStream bis = null;
         try {
             File cacheFile = getCacheFile(generatorKey(key));
@@ -183,7 +179,7 @@ public class CustomBaseDiskCache implements ICacheHelper {
     }
 
     @Override
-    public Object getObject(String key) {
+    public synchronized Serializable getSerializable(String key) {
         ObjectInputStream ois = null;
         try {
             File cacheFile = getCacheFile(generatorKey(key));
@@ -191,7 +187,7 @@ public class CustomBaseDiskCache implements ICacheHelper {
                 return null;
             }
             ois = new ObjectInputStream(new FileInputStream(cacheFile));
-            return ois.readObject();
+            return (Serializable) ois.readObject();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -201,34 +197,34 @@ public class CustomBaseDiskCache implements ICacheHelper {
     }
 
     @Override
-    public Bitmap getBitmap(String key) {
+    public synchronized Bitmap getBitmap(String key) {
         byte[] bytes = getByteArray(generatorKey(key));
         return bytes2Bitmap(bytes);
     }
 
     @Override
-    public boolean isExpired(String key, IExpiredStrategy expiredStrategy) {
-        File cacheFile = getCacheFile(key);
+    public synchronized boolean isExpired(String key, IExpiredStrategy expiredStrategy) {
+        File cacheFile = getCacheFile(generatorKey(key));
         if (cacheFile == null) {
             return true;
         }
         boolean isExpired = expiredStrategy.isExpired(cacheFile.lastModified());
-        Log.d(TAG, "get cache key is:" + key + "; is expired is:" + isExpired);
+        Log.d(TAG, "get mCache key is:" + generatorKey(key) + "; is expired is:" + isExpired);
         return isExpired;
     }
 
     @SuppressWarnings("unused")
     private File getDirectory() {
-        return cache.getDirectory();
+        return mCache.getDirectory();
     }
 
     private File getCacheFile(String key) {
         DiskLruCache.Snapshot snapshot = null;
         try {
-            snapshot = cache.get(generatorKey(key));
+            snapshot = mCache.get(generatorKey(key));
             return snapshot == null ? null : snapshot.getFile(0);
         } catch (IOException e) {
-            Log.e(TAG, e.getMessage());
+            Log.d(TAG, e.getMessage());
             return null;
         } finally {
             if (snapshot != null) {
@@ -240,7 +236,7 @@ public class CustomBaseDiskCache implements ICacheHelper {
 
     private DiskLruCache.Editor getDiskLruCacheEditor(String key) {
         try {
-            return cache.edit(generatorKey(key));
+            return mCache.edit(generatorKey(key));
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -252,6 +248,8 @@ public class CustomBaseDiskCache implements ICacheHelper {
             try {
                 if (success) {
                     editor.commit();
+                    Log.d(TAG, "total size is:" + mCache.size() + ";max size is:" + mCache.getMaxSize());
+                    //mCache.flush();
                 } else {
                     editor.abort();
                 }
@@ -274,9 +272,9 @@ public class CustomBaseDiskCache implements ICacheHelper {
 
 
     @Override
-    public boolean remove(String imageUri) {
+    public synchronized boolean remove(String key) {
         try {
-            return cache.remove(generatorKey(imageUri));
+            return mCache.remove(generatorKey(key));
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
             return false;
@@ -286,22 +284,22 @@ public class CustomBaseDiskCache implements ICacheHelper {
     @SuppressWarnings("unused")
     public void close() {
         try {
-            cache.close();
+            mCache.close();
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
         }
-        cache = null;
+        mCache = null;
     }
 
     @Override
-    public void clear() {
+    public synchronized void clear() {
         try {
-            cache.delete();
+            mCache.delete();
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
         }
         try {
-            initCache(cache.getDirectory(), cache.getMaxSize(), cache.getMaxFileCount());
+            initCache(mCache.getDirectory(), mCache.getMaxSize(), mCache.getMaxFileCount());
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
         }

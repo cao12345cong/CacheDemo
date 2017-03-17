@@ -120,6 +120,26 @@
             android:scaleType="fitXY"
             android:text="test expire2 byte" />
 
+
+        <Button
+            android:id="@+id/btn_test_lru"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:onClick="doClick"
+            android:scaleType="fitXY"
+            android:text="test lru" />
+
+        <Button
+            android:id="@+id/btn_test_lru_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:onClick="doClick"
+            android:scaleType="fitXY"
+            android:text="test lru 2" />
+
+
         <ImageView
             android:id="@+id/image_view"
             android:layout_width="wrap_content"
